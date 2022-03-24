@@ -1,5 +1,4 @@
 bets = {};
-scrolling = false;
 
 saveBets = function()
 {
@@ -57,7 +56,7 @@ betsTSV = function()
   {
     tsv +=  bets[id].event + "\t" + bets[id].side.replaceAll("\n", " ") + "\t" + 
             bets[id].type + "\t" + bets[id].result + "\t" + bets[id].outcome + "\t" + 
-            bets[id].wager + "\t" + bets[id].odds.split("+") + "\t" + bets[id].paid + "\n";
+            bets[id].wager + "\t" + bets[id].odds + "\t" + bets[id].paid + "\n";
   }
   return tsv;
 }
@@ -79,13 +78,23 @@ pageToBottom = function()
   saveBets();
 }
 
-settled = document.getElementsByTagName("li")[1];
-save = settled.cloneNode(true);
-save.id = "save-button";
-save.getElementsByTagName("span")[0].textContent = "Save";
-save.onclick = pageToBottom;
-save.getElementsByTagName("a")[0].href = "javascript: void(0)";
-
-settled.parentElement.appendChild(save);
+addSaveButton = function()
+{
+  if(document.URL != "https://ny.sportsbook.fanduel.com/my-bets")
+  {
+    return;
+  }
+  lis = document.getElementsByTagName("li");
+  settled = lis.length == 10 ? lis[9] : lis[1];
+  save = settled.cloneNode(true);
+  save.getElementsByTagName("span")[0].textContent = "Save";
+  save.onclick = pageToBottom;
+  save.getElementsByTagName("a")[0].href = "javascript: void(0)";
+  if(settled.parentElement.lastChild == settled)
+  {
+    settled.parentElement.appendChild(save);
+  }
+}
+setInterval(addSaveButton, 100);
 
 
