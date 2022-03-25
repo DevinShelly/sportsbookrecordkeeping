@@ -1,4 +1,5 @@
 bets = {};
+scrolling = false;
 
 saveBets = function()
 {
@@ -18,6 +19,8 @@ saveBets = function()
         bet.wager = outcomeSpans[0].textContent;
         bet.odds = betInfoSpans[1].textContent;
         bet.paid = outcomeSpans[2].textContent;
+        bet.placed = outcomeSpans[5].textContent.replace("PLACED: ", "");
+        bet.date = betInfoSpans[betInfoSpans.length-1].textContent;
         
         if(bet.side.indexOf("Leg Parlay") != -1)
         {
@@ -54,9 +57,10 @@ betsTSV = function()
   let tsv = "";
   for (id of Object.keys(bets))
   {
-    tsv +=  bets[id].event + "\t" + bets[id].side.replaceAll("\n", " ") + "\t" + 
-            bets[id].type + "\t" + bets[id].result + "\t" + bets[id].outcome + "\t" + 
-            bets[id].wager + "\t" + bets[id].odds + "\t" + bets[id].paid + "\n";
+    tsv +=  bets[id].placed + "\t" + "FanDuel" + "\t" + id + "\t" + bets[id].event + "\t" + bets[id].date + "\t" + 
+            bets[id].side.replaceAll("\n", " ") + "\t" + bets[id].betType + "\t" + bets[id].result + "\t" + 
+            bets[id].outcome + "\t" + bets[id].wager + "\t" + bets[id].odds.split("+") + "\t" + 
+            bets[id].paid + "\n";
   }
   return tsv;
 }
