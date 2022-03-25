@@ -22,10 +22,8 @@ saveBets = function()
       console.log(betDiv);
       scrolling = false;
     }
-    //bet-outcome-list
-    errors = [];
-    try
-    {
+    
+    //Single Wager
     if(betDiv.querySelectorAll(".bet-outcome-cell").length == 1)
     {
       bet = {
@@ -35,38 +33,49 @@ saveBets = function()
         paid: betDiv.querySelector(".bet-to-pay__value") ? betDiv.querySelector(".bet-to-pay__value").textContent : "$0",
         outcome: betDiv.querySelector(".bet-status").textContent,
         odds: betDiv.querySelector(".sportsbook-odds").textContent,
-        event: betDiv.querySelector(".bet-event__name").textContent,
+        event: betDiv.querySelector(".bet-event__name").textContent.split(" (")[0],
         result: betDiv.querySelector(".bet-outcome-cell__details-result").textContent,
+        placed: betDiv.querySelector(".bet-history-card__date").textContent,
+        date: betDiv.querySelector(".bet-event__name").textContent.split(" (")[1].replace(")", ""),
+        freebet: betDiv.querySelector(".bet-reward-free-bet") ? betDiv.querySelector(".bet-reward-free-bet").textContent.split(" ")[0] : "$0"
       };
     }
+    //Parlay
     else
     {
       bet = {
         side: betDiv.querySelector(".bet-outcome-container__body").innerText,
         betType: betDiv.querySelector(".bet-outcome-container-header-wrapper").textContent.split(" ").slice(0, -1).join(" "),
         wager: betDiv.querySelector(".bet-wager__label").nextSibling.textContent.replace("FREE", "$0"),
+        freebet: betDiv.querySelector(".bet-reward-free-bet") ? betDiv.querySelector(".bet-reward-free-bet").textContent.split(" ")[0] : "$0",
         paid: betDiv.querySelector(".bet-to-pay__value") && betDiv.querySelector(".bet-status").textContent != "OPEN" ? betDiv.querySelector(".bet-to-pay__value").textContent : "$0",
         outcome: betDiv.querySelector(".bet-status").textContent,
         odds: betDiv.querySelector(".sportsbook-odds").textContent,
         event: betDiv.querySelector(".bet-label").textContent,
-        result: betDiv.querySelector(".bet-outcome-cell__details-result").textContent
+        result: null,
+        placed: betDiv.querySelector(".bet-history-card__date").textContent,
+        date: null
       };
     }
     betID = betDiv.querySelector(".bet-history-card__id").textContent;
-    bets[betID] = bet;
-    }
-    catch (error)
+    //For odds boosts, two sets of bets are listed. Only record the second one
+    //Do plus odds first because you can boost from a negative to a positive but never the other way
+    if(bet.odds.indexOf("+") != -1)
     {
-      if(errors.indexOf(betDiv.querySelector(".bet-history-card__id").textContent) == -1)
-      {
-        errors.push(betDiv.querySelector(".bet-history-card__id").textContent);
-        console.log(betDiv.textContent);
-        console.log(error);
-      }
+      bet.odds = "+" + bet.odds.split("+")[bet.odds.split("+").length-1]
     }
+    if(bet.odds.indexOf("−") != -1)
+    {
+      console.log()
+      bet.odds = "-" + bet.odds.split("−")[bet.odds.split("−").length-1];
+    }
+    //Free bets that win need to have their amount calculated
+    if(bet.wager == "$0" && bet.freebet == "$0")
+    {
+      bet.freebet = "$" + (parseFloat(bet.paid.replace("$", ""))/parseFloat(bet.odds)*100).toFixed(2);
+    }
+    bets[betID] = bet;
   }
-  
-  navigator.clipboard.writeText(betTSV());
 }
 
 betsTSV = function()
@@ -74,9 +83,9 @@ betsTSV = function()
   let tsv = "";
   for (id of Object.keys(bets))
   {
-    tsv +=  bets[id].event + "\t" + bets[id].side.replaceAll("\n", " ") + "\t" + 
-            bets[id].betType + "\t" + bets[id].result + "\t" + bets[id].outcome + "\t" + 
-            bets[id].wager + "\t" + bets[id].odds.split("+") + "\t" + bets[id].paid + "\n";
+    tsv +=  bets[id].placed + "\t" + "DraftKings" + "\t" + bets[id].event + "\t" + bets[id].date + "\t" + 
+            bets[id].side.replaceAll("\n", " ") + "\t" + bets[id].betType + "\t" + bets[id].result + "\t" + 
+            bets[id].outcome + "\t" + bets[id].wager + "\t" + bets[id].freebet + "\t" + bets[id].odds + "\t" + bets[id].paid + "\n";
   }
   return tsv;
 }
@@ -113,7 +122,10 @@ scrollPage = function(){
   }
   else
   {
-    setTimeout(function(){scrolling = false}, 500);
+    setTimeout(function(){
+      scrolling = false; 
+      navigator.clipboard.writeText(betsTSV());}, 
+      500);
   }
 }
 
