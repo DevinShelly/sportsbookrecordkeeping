@@ -83,9 +83,10 @@ betsTSV = function()
   let tsv = "";
   for (id of Object.keys(bets))
   {
-    tsv +=  bets[id].placed + "\t" + "DraftKings" + "\t" + bets[id].event + "\t" + bets[id].date + "\t" + 
+    tsv +=  bets[id].placed + "\t" + "DraftKings" + "\t" + id + "\t" + bets[id].event + "\t" + bets[id].date + "\t" + 
             bets[id].side.replaceAll("\n", " ") + "\t" + bets[id].betType + "\t" + bets[id].result + "\t" + 
-            bets[id].outcome + "\t" + bets[id].wager + "\t" + bets[id].freebet + "\t" + bets[id].odds + "\t" + bets[id].paid + "\n";
+            bets[id].outcome + "\t" + bets[id].wager + "\t" + bets[id].odds.split("+") + "\t" + 
+            bets[id].paid + "\n";
   }
   return tsv;
 }
