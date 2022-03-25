@@ -1,5 +1,4 @@
 bets = {};
-scrolling = false;
 
 saveBets = function()
 {
@@ -100,5 +99,3 @@ addSaveButton = function()
   }
 }
 setInterval(addSaveButton, 100);
-
-
