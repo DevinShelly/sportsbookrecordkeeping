@@ -83,17 +83,31 @@ betsTSV = function()
   let tsv = "";
   for (id of Object.keys(bets))
   {
-    tsv +=  bets[id].placed + "\t" + "DraftKings" + "\t" + id + "\t" + bets[id].event + "\t" + bets[id].date + "\t" + 
+    tsv +=  bets[id].placed + "\t" + "PointsBet" + "\t" + id + "\t" + bets[id].event + "\t" + bets[id].date + "\t" + 
             bets[id].side.replaceAll("\n", " ") + "\t" + bets[id].betType + "\t" + bets[id].result + "\t" + 
-            bets[id].outcome + "\t" + bets[id].wager + "\t" + bets[id].odds.split("+") + "\t" + 
+            bets[id].outcome + "\t" + bets[id].wager + "\t" + bets[id].freebet + "\t" + bets[id].odds.split("+") + "\t" + 
             bets[id].paid + "\n";
   }
   return tsv;
 }
 
+copyTSV = function()
+{
+  console.log(document.hasFocus());
+  scrolling = false;
+  navigator.clipboard.writeText(betsTSV());
+}
+
 atBottom = 0;
 pageToBottom = function()
 {
+  console.log(document.hasFocus());
+  if(Object.keys(bets).length > 0)
+  {
+    copyTSV();
+    return;
+  }
+  
   let pageIncrement = 20;
   window.scrollTo(0,window.scrollY + window.innerHeight);
   atBottom += pageIncrement;
@@ -123,18 +137,20 @@ scrollPage = function(){
   }
   else
   {
-    setTimeout(function(){
-      scrolling = false; 
-      navigator.clipboard.writeText(betsTSV());}, 
+    setTimeout(copyTSV,
       500);
   }
 }
 
 links = document.querySelectorAll(".my-bets-nav__tab");
-clonedNode = links[4].cloneNode();
-links[4].after(clonedNode);
-clonedNode.textContent = "Save";
-clonedNode.onmouseup = pageToBottom;
-setInterval(saveBets, 100);
+if(links.length != 0)
+{
+  clonedNode = links[4].cloneNode();
+  links[4].after(clonedNode);
+  clonedNode.textContent = "Copy To TSV";
+  clonedNode.onmouseup = pageToBottom;
+  setInterval(saveBets, 100);
+}
+
 
 
